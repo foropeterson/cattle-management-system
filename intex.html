@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cattle Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            padding: 20px;
+            color: #333;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #2d3e50;
+        }
+
+        main {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        section {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            color: #2d3e50;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            margin: 10px 0 5px;
+        }
+
+        form input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        form input:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #cattle-list-section {
+            flex-grow: 1;
+        }
+
+        #search {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 15px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        #search:focus {
+            border-color: #007bff;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        li span {
+            font-weight: 500;
+        }
+
+        li button {
+            background-color: #e74c3c;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        li button:hover {
+            background-color: #c0392b;
+        }
+
+        #cattle-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            display: none;
+        }
+
+        #cattle-modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            position: relative;
+        }
+
+        #cattle-modal-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            section {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            section {
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Cattle Management System</h1>
+    </header>
+
+    <main>
+        <!-- Overview Section -->
+        <section id="overview">
+            <h2>Farm Overview</h2>
+            <div id="farm-overview">
+                <p>Total Cattle: <span id="total-cattle">0</span></p>
+                <p>Average Age: <span id="average-age">0</span> years</p>
+                <p>Total Weight: <span id="total-weight">0</span> kg</p>
+            </div>
+        </section>
+
+        <!-- Add Cattle Form -->
+        <section id="add-cattle-form">
+            <h2>Add New Cattle</h2>
+            <form id="cattle-form">
+                <label for="name">Cattle Name:</label>
+                <input type="text" id="name" name="name" required>
+                
+                <label for="breed">Breed:</label>
+                <input type="text" id="breed" name="breed" required>
+                
+                <label for="age">Age (in years):</label>
+                <input type="number" id="age" name="age" required>
+
+                <label for="weight">Weight (in kg):</label>
+                <input type="number" id="weight" name="weight" required>
+
+                <button type="submit">Add Cattle</button>
+            </form>
+        </section>
+
+        <!-- Manage Cattle Section -->
+        <section id="cattle-list-section">
+            <h2>Manage Cattle</h2>
+            <input type="text" id="search" placeholder="Search by name..." onkeyup="searchCattle()">
+            <button id="export-csv">Export Data to CSV</button>
+            <ul id="cattle-list">
+                <!-- Cattle records will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Feeding Schedule Section -->
+        <section id="feeding-schedule">
+            <h2>Feeding Schedule</h2>
+            <form id="feeding-form">
+                <label for="feeding-time">Feeding Time:</label>
+                <input type="time" id="feeding-time" required>
+                <button type="submit">Add Feeding Time</button>
+            </form>
+            <ul id="feeding-list">
+                <!-- Feeding schedules will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Health Management Section -->
+        <section id="health-management">
+            <h2>Health Management</h2>
+            <form id="health-form">
+                <label for="health-check">Health Check:</label>
+                <input type="text" id="health-check" placeholder="Enter checkup notes" required>
+                <button type="submit">Add Record</button>
+            </form>
+            <ul id="health-list">
+                <!-- Health records will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Breeding Section -->
+        <section id="breeding-management">
+            <h2>Breeding Management</h2>
+            <form id="breeding-form">
+                <label for="breeding-date">Breeding Date:</label>
+                <input type="date" id="breeding-date" required>
+                <label for="breeding-details">Breeding Details:</label>
+                <input type="text" id="breeding-details" required>
+                <button type="submit">Add Breeding Record</button>
+            </form>
+            <ul id="breeding-list">
+                <!-- Breeding records will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Vaccination Section -->
+        <section id="vaccination-management">
+            <h2>Vaccination Management</h2>
+            <form id="vaccination-form">
+                <label for="vaccine">Vaccine:</label>
+                <input type="text" id="vaccine" required>
+                <label for="vaccination-date">Vaccination Date:</label>
+                <input type="date" id="vaccination-date" required>
+                <button type="submit">Add Vaccination Record</button>
+            </form>
+            <ul id="vaccination-list">
+                <!-- Vaccination records will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Milking Schedule Section -->
+        <section id="milking-schedule">
+            <h2>Milking Schedule</h2>
+            <form id="milking-form">
+                <label for="milking-time">Milking Time:</label>
+                <input type="time" id="milking-time" required>
+                <button type="submit">Add Milking Time</button>
+            </form>
+            <ul id="milking-list">
+                <!-- Milking schedules will be appended here -->
+            </ul>
+        </section>
+
+        <!-- Sales Management Section -->
+        <section id="sales-management">
+            <h2>Sales Management</h2>
+            <form id="sales-form">
+                <label for="buyer-name">Buyer Name:</label>
+                <input type="text" id="buyer-name" required>
+                <label for="sale-date">Sale Date:</label>
+                <input type="date" id="sale-date" required>
+                <label for="sale-amount">Sale Amount:</label>
+                <input type="number" id="sale-amount" required>
+                <button type="submit">Add Sale</button>
+            </form>
+            <ul id="sales-list">
+                <!-- Sales records will be appended here -->
+            </ul>
+        </section>
+    </main>
+
+    <div id="cattle-modal">
+        <div id="cattle-modal-content">
+            <span id="cattle-modal-close">&times;</span>
+            <h2>Cattle Details</h2>
+            <p id="cattle-details"></p>
+        </div>
+    </div>
+
+    <script>
+        let cattleList = [];
+        let feedingSchedule = [];
+        let healthRecords = [];
+        let breedingRecords = [];
+        let vaccinationRecords = [];
+        let milkingSchedule = [];
+        let salesRecords = [];
+
+        // Handle form submission for adding cattle
+        document.getElementById('cattle-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const breed = document.getElementById('breed').value;
+            const age = document.getElementById('age').value;
+            const weight = document.getElementById('weight').value;
+
+            const newCattle = { id: Date.now(), name, breed, age, weight };
+            cattleList.push(newCattle);
+            
+            this.reset();
+            displayCattle();
+            updateOverview();
+            backupData();
+        });
+
+        // Display cattle in the UI
+        function displayCattle() {
+            const cattleListElement = document.getElementById('cattle-list');
+            cattleListElement.innerHTML = ''; 
+            
+            cattleList.forEach(cattle => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${cattle.name} - Breed: ${cattle.breed}, Age: ${cattle.age}, Weight: ${cattle.weight}kg</span>
+                    <button onclick="viewCattle(${cattle.id})">View</button>
+                    <button onclick="deleteCattle(${cattle.id})">Delete</button>
+                `;
+                cattleListElement.appendChild(li);
+            });
+        }
+
+        // Update overview
+        function updateOverview() {
+            const totalCattle = cattleList.length;
+            const totalWeight = cattleList.reduce((sum, cattle) => sum + parseFloat(cattle.weight), 0);
+            const totalAge = cattleList.reduce((sum, cattle) => sum + parseFloat(cattle.age), 0);
+            const averageAge = totalCattle > 0 ? (totalAge / totalCattle).toFixed(2) : 0;
+
+            document.getElementById('total-cattle').textContent = totalCattle;
+            document.getElementById('total-weight').textContent = totalWeight;
+            document.getElementById('average-age').textContent = averageAge;
+        }
+
+        // Delete a cattle record
+        function deleteCattle(id) {
+            cattleList = cattleList.filter(cattle => cattle.id !== id);
+            displayCattle();
+            updateOverview();
+            backupData();
+        }
+
+        // Search cattle by name
+        function searchCattle() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const filteredList = cattleList.filter(cattle => cattle.name.toLowerCase().includes(searchTerm));
+
+            const cattleListElement = document.getElementById('cattle-list');
+            cattleListElement.innerHTML = ''; 
+            
+            filteredList.forEach(cattle => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${cattle.name} - Breed: ${cattle.breed}, Age: ${cattle.age}, Weight: ${cattle.weight}kg</span>
+                    <button onclick="viewCattle(${cattle.id})">View</button>
+                    <button onclick="deleteCattle(${cattle.id})">Delete</button>
+                `;
+                cattleListElement.appendChild(li);
+            });
+        }
+
+        // Handle feeding schedule submission
+        document.getElementById('feeding-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const feedingTime = document.getElementById('feeding-time').value;
+            const li = document.createElement('li');
+            li.textContent = `Feeding Time: ${feedingTime}`;
+            document.getElementById('feeding-list').appendChild(li);
+            this.reset();
+        });
+
+        // Handle health record submission
+        document.getElementById('health-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const healthCheck = document.getElementById('health-check').value;
+            const li = document.createElement('li');
+            li.textContent = `Health Check: ${healthCheck}`;
+            document.getElementById('health-list').appendChild(li);
+            this.reset();
+        });
+
+        // Handle breeding record submission
+        document.getElementById('breeding-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const breedingDate = document.getElementById('breeding-date').value;
+            const breedingDetails = document.getElementById('breeding-details').value;
+            const li = document.createElement('li');
+            li.textContent = `Breeding Date: ${breedingDate}, Details: ${breedingDetails}`;
+            document.getElementById('breeding-list').appendChild(li);
+            this.reset();
+        });
+
+        // Handle vaccination record submission
+        document.getElementById('vaccination-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const vaccine = document.getElementById('vaccine').value;
+            const vaccinationDate = document.getElementById('vaccination-date').value;
+            const li = document.createElement('li');
+            li.textContent = `Vaccine: ${vaccine}, Date: ${vaccinationDate}`;
+            document.getElementById('vaccination-list').appendChild(li);
+            this.reset();
+        });
+
+        // Handle milking schedule submission
+        document.getElementById('milking-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const milkingTime = document.getElementById('milking-time').value;
+            const li = document.createElement('li');
+            li.textContent = `Milking Time: ${milkingTime}`;
+            document.getElementById('milking-list').appendChild(li);
+            this.reset();
+        });
+
+        // Handle sales record submission
+        document.getElementById('sales-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const buyerName = document.getElementById('buyer-name').value;
+            const saleDate = document.getElementById('sale-date').value;
+            const saleAmount = document.getElementById('sale-amount').value;
+            const li = document.createElement('li');
+            li.textContent = `Buyer: ${buyerName}, Date: ${saleDate}, Amount: ${saleAmount}`;
+            document.getElementById('sales-list').appendChild(li);
+            this.reset();
+        });
+
+        // Backup Data to Local Storage
+        function backupData() {
+            localStorage.setItem('cattleData', JSON.stringify(cattleList));
+        }
+
+        // Restore Data from Local Storage
+        function restoreData() {
+            const storedData = localStorage.getItem('cattleData');
+            if (storedData) {
+                cattleList = JSON.parse(storedData);
+                displayCattle();
+                updateOverview();
+            }
+        }
+
+        // Generate and Download Report
+        function generateReport() {
+            let reportContent = "Name,Breed,Age,Weight\n"
+                + cattleList.map(cattle => `${cattle.name},${cattle.breed},${cattle.age},${cattle.weight}`).join("\n");
+
+            let blob = new Blob([reportContent], { type: 'text/csv' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'cattle_report.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        document.getElementById('export-csv').addEventListener('click', generateReport);
+
+        // View Cattle Details
+        function viewCattle(id) {
+            const cattle = cattleList.find(cattle => cattle.id === id);
+            if (cattle) {
+                document.getElementById('cattle-details').textContent = `Name: ${cattle.name}, Breed: ${cattle.breed}, Age: ${cattle.age}, Weight: ${cattle.weight}kg`;
+                document.getElementById('cattle-modal').style.display = 'flex';
+            }
+        }
+
+        // Close Cattle Modal
+        document.getElementById('cattle-modal-close').addEventListener('click', function () {
+            document.getElementById('cattle-modal').style.display = 'none';
+        });
+
+        // Restore data on page load
+        window.addEventListener('load', restoreData);
+    </script>
+</body>
+</html>
