@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Courier Management System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        nav ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .active-nav {
+            font-weight: bold;
+            border-bottom: 2px solid #007bff;
+        }
+        main {
+            padding: 20px;
+        }
+        .section {
+            display: none;
+        }
+        h1 {
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .create-btn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .create-btn:hover {
+            background-color: #0056b3;
+        }
+        .update-btn {
+            background-color: #28a745;
+            color: #fff;
+        }
+        .update-btn:hover {
+            background-color: #218838;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+        .track-btn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .track-btn:hover {
+            background-color: #0056b3;
+        }
+        .report-btn {
+            background-color: #007bff;
+            color: #fff;
+        }
+        .report-btn:hover {
+            background-color: #0056b3;
+        }
+        .shipment-list,
+        .tracking-result,
+        .report-list {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .shipment-list ul,
+        .report-list ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .shipment-list li,
+        .report-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        #create-shipment-form,
+        #update-shipment-form,
+        #delete-shipment-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            color: #007bff;
+        }
+        #error-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#" data-section="dashboard">Dashboard</a></li>
+                <li><a href="#" data-section="shipments">Shipments</a></li>
+                <li><a href="#" data-section="tracking">Tracking</a></li>
+                <li><a href="#" data-section="reports">Reports</a></li>
+                <li><a href="#" data-section="settings">Settings</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <!-- Sections -->
+        <div id="dashboard" class="section">
+            <h1>Dashboard</h1>
+            <p>Welcome to the Courier Management System.</p>
+        </div>
+        <div id="shipments" class="section">
+            <h1>Manage Shipments</h1>
+            <h2>Create Shipment</h2>
+            <form id="create-shipment-form">
+                <div class="form-group">
+                    <label for="sender">Sender:</label>
+                    <input type="text" id="sender" name="sender" placeholder="Enter sender's name" required>
+                </div>
+                <div class="form-group">
+                    <label for="receiver">Receiver:</label>
+                    <input type="text" id="receiver" name="receiver" placeholder="Enter receiver's name" required>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg):</label>
+                    <input type="number" id="weight" name="weight" placeholder="Enter weight in kilograms" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="create-btn">Create Shipment</button>
+                </div>
+            </form>
+            <div class="shipment-list">
+                <h2>Existing Shipments</h2>
+                <ul id="shipment-list">
+                    <!-- Shipment items will be dynamically inserted here -->
+                </ul>
+            </div>
+        </div>
+
+        <div id="update-shipment" class="section">
+            <h1>Update Shipment</h1>
+            <form id="update-shipment-form">
+                <div class="form-group">
+                    <label for="update-id">Shipment ID:</label>
+                    <input type="text" id="update-id" name="update-id" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-sender">Sender:</label>
+                    <input type="text" id="update-sender" name="update-sender" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-receiver">Receiver:</label>
+                    <input type="text" id="update-receiver" name="update-receiver" required>
+                </div>
+                <div class="form-group">
+                    <label for="update-weight">Weight (kg):</label>
+                    <input type="number" id="update-weight" name="update-weight" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="update-btn">Update Shipment</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="delete-shipment" class="section">
+            <h1>Delete Shipment</h1>
+            <form id="delete-shipment-form">
+                <div class="form-group">
+                    <label for="delete-id">Shipment ID:</label>
+                    <input type="text" id="delete-id" name="delete-id" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="delete-btn">Delete Shipment</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="tracking" class="section">
+            <h1>Track Shipment</h1>
+            <form id="tracking-form">
+                <div class="form-group">
+                    <label for="tracking-id">Tracking ID:</label>
+                    <input type="text" id="tracking-id" name="tracking-id" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="track-btn">Track</button>
+                </div>
+            </form>
+            <div class="tracking-result">
+                <!-- Tracking results will be displayed here -->
+            </div>
+        </div>
+        
+        <div id="reports" class="section">
+            <h1>Generate Reports</h1>
+            <form id="report-form">
+                <div class="form-group">
+                    <label for="report-type">Report Type:</label>
+                    <select id="report-type" name="report-type">
+                        <option value="daily">Daily Report</option>
+                        <option value="weekly">Weekly Report</option>
+                        <option value="monthly">Monthly Report</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="report-btn">Generate Report</button>
+                </div>
+            </form>
+            <div class="report-list">
+                <h2>Generated Reports</h2>
+                <ul id="report-list">
+                    <!-- Generated reports will be dynamically inserted here -->
+                </ul>
+            </div>
+        </div>
+
+        <div id="settings" class="section">
+            <h1>Settings</h1>
+            <!-- Settings content here -->
+        </div>
+
+        <div id="loading" class="loading">Loading...</div>
+        <div id="error-message" class="error-message"></div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.section');
+            const links = document.querySelectorAll('nav ul li a');
+            const loading = document.getElementById('loading');
+            const errorMessage = document.getElementById('error-message');
+
+            function showSection(sectionId) {
+                sections.forEach(section => {
+                    section.style.display = section.id === sectionId ? 'block' : 'none';
+                });
+                links.forEach(link => {
+                    link.classList.toggle('active-nav', link.getAttribute('data-section') === sectionId);
+                });
+            }
+
+            links.forEach(link => {
+                link.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const sectionId = link.getAttribute('data-section');
+                    showSection(sectionId);
+                });
+            });
+
+            showSection('dashboard');
+
+            async function submitForm(url, method, formData) {
+                try {
+                    loading.style.display = 'block';
+                    const response = await fetch(url, {
+                        method: method,
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    const data = await response.json();
+                    alert(data.message); // Ensure 'message' exists in the response
+                } catch (error) {
+                    errorMessage.textContent = `Failed to submit form: ${error.message}`;
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            document.querySelector('#create-shipment-form').addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                submitForm('/create-shipment', 'POST', formData);
+            });
+
+            document.querySelector('#update-shipment-form').addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                submitForm('/update-shipment', 'PUT', formData);
+            });
+
+            document.querySelector('#delete-shipment-form').addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formData = new FormData(event.target);
+                submitForm('/delete-shipment', 'DELETE', formData);
+            });
+
+            document.querySelector('#tracking-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                try {
+                    loading.style.display = 'block';
+                    const formData = new FormData(event.target);
+                    const response = await fetch('/track-shipment', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    const data = await response.json();
+                    // Display tracking result
+                    document.querySelector('.tracking-result').innerHTML = `<p>${data.result}</p>`;
+                } catch (error) {
+                    errorMessage.textContent = `Failed to track shipment: ${error.message}`;
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+
+            document.querySelector('#report-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                try {
+                    loading.style.display = 'block';
+                    const formData = new FormData(event.target);
+                    const response = await fetch('/generate-report', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
+                    const data = await response.json();
+                    // Display generated reports
+                    document.querySelector('#report-list').innerHTML = data.reports.map(report => 
+                        `<li><strong>Report Type:</strong> ${report.type} <strong>Date:</strong> ${report.date}</li>`
+                    ).join('');
+                } catch (error) {
+                    errorMessage.textContent = `Failed to generate report: ${error.message}`;
+                } finally {
+                    loading.style.display = 'none';
+                }
+            });
+
+            async function fetchShipments() {
+                try {
+                    loading.style.display = 'block';
+                    const response = await fetch('/get-shipments');
+                    if (!response.ok) throw new Error('Failed to fetch shipments');
+                    const data = await response.json();
+                    // Update shipment list
+                    document.querySelector('#shipment-list').innerHTML = data.shipments.map(shipment =>
+                        `<li><strong>Sender:</strong> ${shipment.sender} <strong>Receiver:</strong> ${shipment.receiver} <strong>Weight:</strong> ${shipment.weight}kg</li>`
+                    ).join('');
+                } catch (error) {
+                    errorMessage.textContent = `Failed to fetch shipments: ${error.message}`;
+                } finally {
+                    loading.style.display = 'none';
+                }
+            }
+
+            fetchShipments();
+        });
+    </script>
+</body>
+</html>
